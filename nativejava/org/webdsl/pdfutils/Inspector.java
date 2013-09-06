@@ -7,8 +7,10 @@ import com.google.common.io.Files;
 
 public class Inspector {
 	
-	private static final String PDFEXTRACT_CMD = "pdf-extract extract --titles --outline --references";
-	private static final String PDFEXTRACT_CMD_PREFIX = PDFEXTRACT_CMD + " ";
+	private static String PDFEXTRACT_OPTIONS = "--references --titles";
+	private static String PDFEXTRACT_CMD = "pdf-extract extract " + PDFEXTRACT_OPTIONS;
+	private static String PDFEXTRACT_CMD_PREFIX = PDFEXTRACT_CMD + " ";
+	
 
 	public Inspector() {
 	}
@@ -25,7 +27,7 @@ public class Inspector {
 		try {
 			is = pdfFile.getContentStream();
 			dstDir = Files.createTempDir();
-			dstFile = File.createTempFile("Inspector-File-", "pdf", dstDir);
+			dstFile = File.createTempFile("Inspector-File-", ".pdf", dstDir);
 			os = new FileOutputStream(dstFile);
 
 			int read = 0;
@@ -67,6 +69,7 @@ public class Inspector {
 			
 			String path =  dstFile.getAbsolutePath();
 			System.out.println("Executing:" + PDFEXTRACT_CMD_PREFIX + path);
+			long start = System.currentTimeMillis();
 			Process pr = rt.exec(PDFEXTRACT_CMD_PREFIX + path);
 
 			BufferedReader input = new BufferedReader(new InputStreamReader(
@@ -82,6 +85,10 @@ public class Inspector {
 
 			int exitVal = pr.waitFor();
 			System.out.println("Exited with error code " + exitVal);
+			if(exitVal != 0){
+				resultSb.append("Error: pdf-extract exited with error code " + exitVal);
+			}
+			resultSb.append( "\n\n pdf-extract execution time (ms): " + (System.currentTimeMillis() - start) );
 
 		} catch (Exception e) {
 			System.out.println(e.toString());

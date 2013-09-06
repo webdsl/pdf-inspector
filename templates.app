@@ -32,6 +32,7 @@ define mainheader() {
 
 define applicationmenu() {
   navbaritem{ navigate(root()){"Home"} }
+  navbaritem{ navigate(latestRequests(50)){"Request History"} }
 }
 
 define navbaritem(){
