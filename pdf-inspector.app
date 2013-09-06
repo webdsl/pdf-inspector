@@ -49,11 +49,12 @@ define page inspectorResult(req : InspectorRequest){
 }
 
 define page latestRequests(lim : Int){
-	var requests := from InspectorRequest order by created asc limit ~lim;
+	var requests := from InspectorRequest order by modified desc limit ~lim;
 		
 	main()
 	
 	define body() {	
+		<h2> "Latest evaluations:" </h2>
 		list{
 			for(r: InspectorRequest in requests){
 				listitem{ output( r ) }
@@ -66,7 +67,7 @@ define page latestRequests(lim : Int){
 }
 
 define output(r : InspectorRequest){
-	output(r.created) ": "
+	output(r.modified) ": "
 	navigate( inspectorResult(r) ){ output(r.file.getFileName())  } 
 	" --- "
 	remove(r)
@@ -100,7 +101,24 @@ define showInfo(req : InspectorRequest){
 	}
 }
 
+define page pdfextract_config(){
+	var flexValue :Float := Inspector.getFlexValue()
+	
+	main()	
+	
+	define body() {
+		par{
+			form{
+				"Flex-value: " input(flexValue)
+				submit action{ Inspector.setFlexValue(flexValue); }{ "set"}
+			}
+		}
+	}
+}
+
 
   native class org.webdsl.pdfutils.Inspector as Inspector {
     static getInfo(File) : String
+    static getFlexValue(): Float
+    static setFlexValue(Float)
   }

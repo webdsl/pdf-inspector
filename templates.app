@@ -33,6 +33,7 @@ define mainheader() {
 define applicationmenu() {
   navbaritem{ navigate(root()){"Home"} }
   navbaritem{ navigate(latestRequests(50)){"Request History"} }
+  navbaritem{ navigate(pdfextract_config()){"Configure pdf-extract"} }
 }
 
 define navbaritem(){

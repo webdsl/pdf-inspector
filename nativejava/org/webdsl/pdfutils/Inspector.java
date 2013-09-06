@@ -7,14 +7,35 @@ import com.google.common.io.Files;
 
 public class Inspector {
 	
-	private static String PDFEXTRACT_OPTIONS = "--references --titles";
-	private static String PDFEXTRACT_CMD = "pdf-extract extract " + PDFEXTRACT_OPTIONS;
-	private static String PDFEXTRACT_CMD_PREFIX = PDFEXTRACT_CMD + " ";
+	private static float FLEX_VALUE= 0.20f;
+	private static String FLEX_SETTING;
+	private static String PDFEXTRACT_OPTIONS;
+	private static String PDFEXTRACT_CMD;
+	private static String PDFEXTRACT_CMD_PREFIX;
 	
+	static{
+		buildCommandStrings();
+	}
 
 	public Inspector() {
 	}
-
+	
+	private static void buildCommandStrings(){
+		FLEX_SETTING = " --set reference_flex:" + FLEX_VALUE;
+		PDFEXTRACT_OPTIONS = " --titles --references" + FLEX_SETTING;
+		PDFEXTRACT_CMD = "pdf-extract extract" + PDFEXTRACT_OPTIONS;
+		PDFEXTRACT_CMD_PREFIX = PDFEXTRACT_CMD + " ";		
+	}
+	
+	public static void setFlexValue(float f){
+		FLEX_VALUE = f;
+		buildCommandStrings();
+	}
+	
+	public static float getFlexValue(){
+		return FLEX_VALUE;
+	}
+	
 	public static String getInfo(utils.File pdfFile) {
 
 		InputStream is = null;
@@ -22,6 +43,7 @@ public class Inspector {
 		File dstDir = null;
 		File dstFile = null;
 		StringBuilder resultSb = new StringBuilder(256);
+		StringBuilder executionSb = new StringBuilder(256);
 				
 		// create temp dir and file, and write content stream to file
 		try {
@@ -68,9 +90,10 @@ public class Inspector {
 			// Process pr = rt.exec("cmd /c dir");
 			
 			String path =  dstFile.getAbsolutePath();
-			System.out.println("Executing:" + PDFEXTRACT_CMD_PREFIX + path);
+			String command = PDFEXTRACT_CMD_PREFIX + path;
+			System.out.println("Executing:" + command);
 			long start = System.currentTimeMillis();
-			Process pr = rt.exec(PDFEXTRACT_CMD_PREFIX + path);
+			Process pr = rt.exec( command );
 
 			BufferedReader input = new BufferedReader(new InputStreamReader(
 					pr.getInputStream()));
@@ -86,9 +109,13 @@ public class Inspector {
 			int exitVal = pr.waitFor();
 			System.out.println("Exited with error code " + exitVal);
 			if(exitVal != 0){
-				resultSb.append("Error: pdf-extract exited with error code " + exitVal);
+				executionSb.append("Error: pdf-extract exited with error code " + exitVal);
 			}
-			resultSb.append( "\n\n pdf-extract execution time (ms): " + (System.currentTimeMillis() - start) );
+			executionSb.append( "\n*executed command: ").append(command)
+					.append( "*pdf-extract execution time (ms): ").append( System.currentTimeMillis() - start )
+					.append( "\n*pdf flex value: ").append(FLEX_VALUE)					
+					.append( "\n\n" );
+					
 
 		} catch (Exception e) {
 			System.out.println(e.toString());
@@ -102,7 +129,7 @@ public class Inspector {
 			e.printStackTrace();
 		}
 		
-		return resultSb.toString();
+		return executionSb.toString() + resultSb.toString();
 	}
 
 	private static void delete(File f) throws IOException {
