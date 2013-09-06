@@ -7,7 +7,8 @@ import com.google.common.io.Files;
 
 public class Inspector {
 	
-	private static final String PDFEXTRACT_CMD_PREFIX = "pdf-extract extract --references ";
+	private static final String PDFEXTRACT_CMD = "pdf-extract extract --titles --outline --references";
+	private static final String PDFEXTRACT_CMD_PREFIX = PDFEXTRACT_CMD + " ";
 
 	public Inspector() {
 	}
@@ -24,7 +25,7 @@ public class Inspector {
 		try {
 			is = pdfFile.getContentStream();
 			dstDir = Files.createTempDir();
-			dstFile = File.createTempFile(pdfFile.getFileName(), "", dstDir);
+			dstFile = File.createTempFile("Inspector-File-", "pdf", dstDir);
 			os = new FileOutputStream(dstFile);
 
 			int read = 0;
@@ -65,6 +66,7 @@ public class Inspector {
 			// Process pr = rt.exec("cmd /c dir");
 			
 			String path =  dstFile.getAbsolutePath();
+			System.out.println("Executing:" + PDFEXTRACT_CMD_PREFIX + path);
 			Process pr = rt.exec(PDFEXTRACT_CMD_PREFIX + path);
 
 			BufferedReader input = new BufferedReader(new InputStreamReader(
