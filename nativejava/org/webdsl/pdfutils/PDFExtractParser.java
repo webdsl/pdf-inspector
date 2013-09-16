@@ -1,11 +1,13 @@
 package org.webdsl.pdfutils;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -21,8 +23,7 @@ public class PDFExtractParser {
 
 			DefaultHandler handler = new DefaultHandler() {
 
-				boolean inTitle = false;
-				boolean inReference = false;
+				String currentValue;
 				
 				public void startElement( String uri, String localName,
 						String qName, Attributes attributes )
@@ -43,25 +44,24 @@ public class PDFExtractParser {
 					
 					String charsAsString = new String( ch, start, length );
 
-					if ( inTitle ) {
-						data.setTitle( charsAsString );
-					} else if ( inReference ){
-						data.addReference( charsAsString );
-					}
+					currentValue += charsAsString;
 
 				}
 				
 				public void setInState ( String name, boolean state){
 					if ( name.equalsIgnoreCase( "TITLE" ) ) {
-						inTitle = state;
+						if(!state)
+							data.setTitle( currentValue );
 					} else if ( name.equalsIgnoreCase( "REFERENCE" ) ) {
-						inReference = state;
+						if(!state)
+							data.addReference( currentValue );								
 					}
+					currentValue = "";
 				}
 
 			};
-
-			saxParser.parse(is, handler);
+			InputSource inputSource = new InputSource(new InputStreamReader(is));
+			saxParser.parse(inputSource, handler);
 
 		} catch ( Exception e ) {
 			e.printStackTrace();

@@ -103,6 +103,7 @@ define output(r : InspectorRequest){
 }
 
 define output(r : ExtractionResult){
+	var counter:= 1;
 	table{
 		row {
 			column{ <strong>"Execution"</strong> } column{ <pre> output( r.executionLog ) </pre> }
@@ -113,7 +114,10 @@ define output(r : ExtractionResult){
 		
 		row { column2{ <strong>"References (" output(r.references.length) ")"</strong>	} }	
 		for( re : ReferenceEntry in r.references){
-			row { column{ output( r.references.indexOf(re)+1 ) } column{ output( re.data ) } }
+			row { column{ output( counter ) } column{ output( re.data ) } }
+			render{
+				counter := counter + 1;
+			}
 		}
 		
 		row { column2{ <strong>"Original program output"</strong> } }
