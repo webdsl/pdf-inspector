@@ -21,7 +21,7 @@ entity InspectorRequest {
 }
 
 entity ExtractionResult {
-	title : String
+	title : Text
 	references <> List<ReferenceEntry>
 	programOutput : Text
 	executionLog : Text	
