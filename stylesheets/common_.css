@@ -76,7 +76,7 @@ div#push{
 }
 div#footer {
   /* positioning */
-  width: 800px;
+  width: 97%;
   height: 30px; /* same as negative margin-bottom on #pagewrapper */
   margin: 0 auto;
   /* text and colors */

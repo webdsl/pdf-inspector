@@ -43,8 +43,8 @@ define requestForm(){
 		submit action {
 			validate( (file != null ) , "Select a valid file");
 			var ir := InspectorRequest{ file := file };
-			inspect( ir );
-			
+			inspect( ir );			
+			ir.save();			
 			return inspectorResult(ir);
 		}{ "upload and check" }
 	}  	
