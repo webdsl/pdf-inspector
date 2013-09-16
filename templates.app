@@ -55,4 +55,8 @@ define override errorTemplateInput(messages : List<String>){
     </tr>
   }
 }
+
+define column2(){
+	 <td colspan="2"> elements </td>
+}
  

@@ -15,9 +15,20 @@ define page root() {
   }
 }
 
-entity InspectorRequest{
+entity InspectorRequest {
 	file : File
-	result : Text
+	result <> ExtractionResult
+}
+
+entity ExtractionResult {
+	title : String
+	references <> List<ReferenceEntry>
+	programOutput : Text
+	executionLog : Text	
+}
+
+entity ReferenceEntry {
+	data : Text
 }
 
 define requestForm(){
@@ -32,11 +43,29 @@ define requestForm(){
 		submit action {
 			validate( (file != null ) , "Select a valid file");
 			var ir := InspectorRequest{ file := file };
-			ir.result := Inspector.getInfo(file);
-			ir.save();
+			inspect( ir );
+			
 			return inspectorResult(ir);
 		}{ "upload and check" }
 	}  	
+}
+
+function inspect( ir : InspectorRequest ) : InspectorRequest{
+	var result := Inspector.getInfo( ir.file );
+	var refs := List<ReferenceEntry>();
+	
+	for ( ref : String in result.getReferences() ){
+		refs.add( ReferenceEntry{ data := ref } );
+	}
+	
+	var eResult := ExtractionResult{
+					title := result.getTitle()
+					references := refs
+					executionLog := result.getExecutionLog()
+					programOutput := result.getProgramOutput()
+				   };
+	ir.result := eResult;
+	return ir;
 }
 
 define page inspectorResult(req : InspectorRequest){
@@ -73,6 +102,26 @@ define output(r : InspectorRequest){
 	remove(r)
 }
 
+define output(r : ExtractionResult){
+	table{
+		row {
+			column{ <strong>"Execution"</strong> } column{ <pre> output( r.executionLog ) </pre> }
+		}
+		row {
+			column{ <strong>"Title"</strong> } column{ output( r.title ) }			
+		}
+		
+		row { column2{ <strong>"References (" output(r.references.length) ")"</strong>	} }	
+		for( re : ReferenceEntry in r.references){
+			row { column{ output( r.references.indexOf(re)+1 ) } column{ output( re.data ) } }
+		}
+		
+		row { column2{ <strong>"Original program output"</strong> } }
+		row { column2{ <pre> output(r.programOutput) </pre> } }
+		
+	}
+}
+
 define remove(r : InspectorRequest){
 	submit remove(r){"remove"}
 	action remove( r: InspectorRequest ){
@@ -86,18 +135,18 @@ define showInfo(req : InspectorRequest){
 	<h2> "Pdf-extract results for file: " output(req.file.getFileName()) </h2>
 	par{ "download pdf-file: " output(req.file) }
 	par{ "rerun pdf-extract: "
-			submit action {
-			req.result := Inspector.getInfo(req.file);
-			req.save();
+		submit action {
+			inspect( req );
 			return inspectorResult(req);
 		}{"re-evaluate"}
 	}
 	par{ "remove this request: " remove(req)}
-	par{
-		"pdf-extract output:"
-		<pre>
-		  output(req.result)
-		</pre>
+	par{ "extraced data:"
+	    if( req.result == null) {
+	    	" NO DATA, please re-evaluate"
+	    } else {
+			output(req.result)
+		}
 	}
 }
 
@@ -116,9 +165,15 @@ define page pdfextract_config(){
 	}
 }
 
+native class org.webdsl.pdfutils.Inspector as Inspector {
+	static getInfo(File) : PDFExtractData
+	static getFlexValue(): Float
+	static setFlexValue(Float)
+}
 
-  native class org.webdsl.pdfutils.Inspector as Inspector {
-    static getInfo(File) : String
-    static getFlexValue(): Float
-    static setFlexValue(Float)
-  }
+native class org.webdsl.pdfutils.PDFExtractData as PDFExtractData {
+	getTitle() : String
+	getReferences() : List<String>
+	getExecutionLog() : String
+	getProgramOutput() : String
+}

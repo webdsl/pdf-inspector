@@ -44,7 +44,7 @@ span.highlightcontent {
 
 div#pagewrapper {
   /* positioning */
-  width: 800px;
+  width: 97%;
   margin: 0 auto -30px; /* negative margin to give footer room */
   border-left: 1px solid #999;
   border-right: 1px solid #999;
@@ -131,3 +131,29 @@ span.navbaritem a:hover {
   background-color: #333;
   color: #fff;
 }
+table {
+	border-width: 1px;
+	border-spacing: 2px;
+	border-style: none;
+	border-color: gray;
+	border-collapse: separate;
+	background-color: white;
+}
+table th {
+	border-width: 1px;
+	padding: 1px;
+	border-style: solid;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+table td {
+	border-width: 1px;
+	padding: 1px;
+	border-style: solid;
+	border-color: gray;
+	background-color: white;
+	-moz-border-radius: ;
+}
+
+
