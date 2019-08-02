@@ -128,9 +128,9 @@ define output(r : ExtractionResult){
 
 define remove(r : InspectorRequest){
 	submit remove(r){"remove"}
-	action remove( r: InspectorRequest ){
-		r.file := null;
-		r.delete();
+	action remove( ir: InspectorRequest ){
+		ir.file := null;
+		ir.delete();
 		return latestRequests(50);
 	}
 }
